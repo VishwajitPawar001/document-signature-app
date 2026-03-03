@@ -14,7 +14,7 @@ function Documents() {
         const token = localStorage.getItem("token");
 
         const res = await fetch(
-          "${import.meta.env.VITE_API_URL}/api/documents/my-documents",
+          `${import.meta.env.VITE_API_URL}/api/documents/my-documents`,
           {
             headers: {
               Authorization: `Bearer ${token}`
