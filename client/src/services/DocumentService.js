@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api/documents";
+const BASE_URL = `${import.meta.env.VITE_API_URL}/api/documents`;
 
 export const uploadDocument = async (file) => {
   const token = localStorage.getItem("token");
@@ -48,7 +48,7 @@ export const getDocumentById = async (id) => {
   const token = localStorage.getItem("token");
 
   const response = await axios.get(
-    `http://localhost:5000/api/documents/${id}`,
+    `${import.meta.env.VITE_API_URL}/api/documents/${id}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

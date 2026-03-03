@@ -36,7 +36,7 @@ function Settings() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        "http://localhost:5000/api/auth/change-password",
+        "${import.meta.env.VITE_API_URL}/api/auth/change-password",
         {
           method: "PUT",
           headers: {

@@ -67,7 +67,7 @@ function DocumentDetail() {
       const token = localStorage.getItem("token");
 
       const res = await fetch(
-        `http://localhost:5000/api/documents/${id}/signatures`,
+        `${import.meta.env.VITE_API_URL}/api/documents/${id}/signatures`,
         {
           method: "PUT",
           headers: {
@@ -241,7 +241,7 @@ function DocumentDetail() {
               className="w-full h-[700px] overflow-y-auto flex justify-center items-start bg-slate-900 rounded-lg"
             >
               <Document
-                file={`http://localhost:5000/${documentData.filePath.replace(/\\/g, "/")}`}
+                file={`${import.meta.env.VITE_API_URL}/${documentData.filePath.replace(/\\/g, "/")}`}
                 onLoadSuccess={({ numPages }) => setNumPages(numPages)}
               >
                 {numPages &&

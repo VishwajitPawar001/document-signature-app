@@ -60,7 +60,7 @@ function ParticipantModal({ documentId, onClose, onSuccess }) {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        `http://localhost:5000/api/documents/${documentId}/participants`,
+        `${import.meta.env.VITE_API_URL}/api/documents/${documentId}/participants`,
         {
           participants,
           workflowMode
