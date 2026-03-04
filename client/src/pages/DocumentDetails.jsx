@@ -221,6 +221,16 @@ function DocumentDetail() {
                 Save Layout
               </button>
 
+              {documentData.status === "Completed" && (
+                <a
+                  href={`${import.meta.env.VITE_API_URL}/${documentData.filePath.replace(/\\/g, "/")}`}
+                  download
+                  className="px-4 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-700"
+                >
+                  Download Signed PDF
+                </a>
+              )}
+
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="px-4 py-2 bg-indigo-600 rounded-lg"

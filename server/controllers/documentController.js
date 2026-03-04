@@ -1,5 +1,6 @@
 const Document = require("../models/Document");
 const { generateSignedPDF } = require("../services/pdfService");
+const { sendSigningEmail } = require("../services/emailService");
 const jwt = require("jsonwebtoken");
 
 /* =====================================
@@ -122,6 +123,14 @@ exports.addParticipants = async (req, res) => {
     });
 
     document.participants = normalizedParticipants;
+    // Send email to participants
+    for (const p of normalizedParticipants) {
+      try {
+        await sendSigningEmail(p.email, p.token);
+      } catch (err) {
+        console.log("Email error:", err.message);
+      }
+    }
     document.workflowMode = workflowMode;
 
     if (document.status !== "Completed") {
