@@ -4,6 +4,7 @@ const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
 exports.generateSignedPDF = async (document) => {
   try {
+
     const originalPath = path.join(
       __dirname,
       "..",
@@ -17,14 +18,15 @@ exports.generateSignedPDF = async (document) => {
     const pages = pdfDoc.getPages();
 
     for (const signature of document.signatureFields) {
+
       if (signature.status !== "Signed" || !signature.image) continue;
 
       const pageIndex = signature.page - 1;
       const pdfPage = pages[pageIndex];
+
       if (!pdfPage) continue;
 
       const { width: pdfWidth, height: pdfHeight } = pdfPage.getSize();
-
 
       const x = signature.xPercent * pdfWidth;
       const width = signature.widthPercent * pdfWidth;
@@ -53,8 +55,7 @@ exports.generateSignedPDF = async (document) => {
         height
       });
 
-
-      /* ===== DRAW INFO BELOW SIGNATURE ===== */
+      /* ===== TEXT BELOW SIGNATURE ===== */
 
       const baseTextY = y - 14;
       let lineOffset = 0;
@@ -70,6 +71,7 @@ exports.generateSignedPDF = async (document) => {
         font,
         color: rgb(0, 0, 0)
       });
+
       lineOffset += 12;
 
       if (signature.role) {
@@ -80,6 +82,7 @@ exports.generateSignedPDF = async (document) => {
           font,
           color: rgb(0.2, 0.2, 0.2)
         });
+
         lineOffset += 12;
       }
 
@@ -91,6 +94,7 @@ exports.generateSignedPDF = async (document) => {
           font,
           color: rgb(0.3, 0.3, 0.3)
         });
+
         lineOffset += 12;
       }
 
@@ -108,35 +112,16 @@ exports.generateSignedPDF = async (document) => {
       }
     }
 
-    const signedPdfBytes = await pdfDoc.save();
+    /* 🔥 IMPORTANT: RETURN PDF BUFFER INSTEAD OF SAVING */
 
-    const signedDir = path.join(
-      __dirname,
-      "..",
-      "uploads",
-      "signed"
-    );
+    const pdfBytes = await pdfDoc.save();
 
-    if (!fs.existsSync(signedDir)) {
-      fs.mkdirSync(signedDir, { recursive: true });
-    }
-
-
-    const signedFilePath = path.join(
-      signedDir,
-      `signed_${Date.now()}.pdf`
-
-    );
-
-    fs.writeFileSync(signedFilePath, signedPdfBytes);
-
-    return signedFilePath.replace(
-      path.join(__dirname, "..") + path.sep,
-      ""
-    );
+    return pdfBytes;
 
   } catch (error) {
+
     console.error("PDF Generation Error:", error);
     throw error;
+
   }
 };

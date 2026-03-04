@@ -29,5 +29,7 @@ router.put("/:id/signatures", protect, saveSignatures);
 
 router.get("/:id", protect, getDocumentById);
 
+router.get("/:id/download", protect, downloadSignedPDF);
+
 
 module.exports = router;

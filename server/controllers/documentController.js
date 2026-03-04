@@ -123,14 +123,12 @@ exports.addParticipants = async (req, res) => {
     });
 
     document.participants = normalizedParticipants;
-    // Send email to participants
-    for (const p of normalizedParticipants) {
-      try {
-        await sendSigningEmail(p.email, p.token);
-      } catch (err) {
-        console.log("Email error:", err.message);
-      }
-    }
+    const frontendURL = process.env.FRONTEND_URL;
+
+    document.participants = normalizedParticipants.map(p => ({
+      ...p,
+      signingLink: `${frontendURL}/sign/${p.token}`
+    }));
     document.workflowMode = workflowMode;
 
     if (document.status !== "Completed") {
@@ -370,5 +368,31 @@ exports.signDocument = async (req, res) => {
   } catch (error) {
     console.log(error);
     res.status(401).json({ message: "Invalid link" });
+  }
+};
+
+exports.downloadSignedPDF = async (req, res) => {
+  try {
+
+    const document = await Document.findById(req.params.id);
+
+    if (!document)
+      return res.status(404).json({ message: "Not found" });
+
+    const pdfBuffer = await generateSignedPDF(document);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${document.title}-signed.pdf"`
+    );
+
+    res.send(pdfBuffer);
+
+  } catch (error) {
+
+    console.log(error);
+    res.status(500).json({ message: "Failed to generate PDF" });
+
   }
 };

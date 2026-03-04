@@ -78,7 +78,6 @@ function DocumentDetail() {
             signatures: signatures.map(sig => ({
               page: sig.page,
 
-              // 🔥 ALWAYS send percent values
               xPercent:
                 sig.xPercent !== undefined
                   ? sig.xPercent
@@ -223,13 +222,13 @@ function DocumentDetail() {
 
               {documentData.status === "Completed" && (
                 <a
-                  href={`${import.meta.env.VITE_API_URL}/${documentData.filePath.replace(/\\/g, "/")}`}
-                  download
+                  href={`${import.meta.env.VITE_API_URL}/api/documents/${id}/download`}
                   className="px-4 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-700"
                 >
                   Download Signed PDF
                 </a>
               )}
+            
 
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -238,6 +237,41 @@ function DocumentDetail() {
                 Manage Participants
               </button>
             </div>
+          </div>
+
+          {/* PARTICIPANTS + SIGNING LINKS */}
+          <div className="bg-slate-800 p-6 rounded-xl">
+            <h2 className="text-xl font-semibold mb-4">
+              Participants
+            </h2>
+
+            {documentData.participants.map((p, index) => (
+              <div
+                key={index}
+                className="bg-slate-700 p-4 rounded-lg mb-3"
+              >
+                <p className="font-medium">{p.email}</p>
+
+                <p className="text-sm text-slate-400">
+                  {p.role} {p.designation && `• ${p.designation}`}
+                </p>
+
+                {p.signingLink && (
+                  <div className="mt-2 text-sm text-blue-400 break-all">
+                    {p.signingLink}
+
+                    <button
+                      onClick={() =>
+                        navigator.clipboard.writeText(p.signingLink)
+                      }
+                      className="ml-3 text-xs bg-slate-600 px-2 py-1 rounded"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
 
           {/* PDF PREVIEW */}
