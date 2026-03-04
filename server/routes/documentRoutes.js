@@ -8,7 +8,8 @@ const {
   addParticipants,
   getDocumentForSigning,
   signDocument,
-  saveSignatures
+  saveSignatures,
+  downloadSignedPDF
 } = require("../controllers/documentController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -27,9 +28,10 @@ router.post("/:id/participants", protect, addParticipants);
 
 router.put("/:id/signatures", protect, saveSignatures);
 
+router.get("/:id/download", protect, downloadSignedPDF);
+
 router.get("/:id", protect, getDocumentById);
 
-router.get("/:id/download", protect, downloadSignedPDF);
 
 
 module.exports = router;
