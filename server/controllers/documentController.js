@@ -146,7 +146,17 @@ exports.addParticipants = async (req, res) => {
       userAgent: req.headers["user-agent"]
     });
 
-    await document.save();
+    await Document.findByIdAndUpdate(
+      document._id,
+      {
+        participants: document.participants,
+        signatureFields: document.signatureFields,
+        workflowMode: document.workflowMode,
+        status: document.status,
+        auditTrail: document.auditTrail
+      },
+      { new: true }
+    );
 
     res.json(document);
 
