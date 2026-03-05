@@ -228,7 +228,7 @@ function DocumentDetail() {
                   Download Signed PDF
                 </a>
               )}
-            
+
 
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -239,39 +239,48 @@ function DocumentDetail() {
             </div>
           </div>
 
-          {/* PARTICIPANTS + SIGNING LINKS */}
+          {/* PARTICIPANTS */}
           <div className="bg-slate-800 p-6 rounded-xl">
             <h2 className="text-xl font-semibold mb-4">
               Participants
             </h2>
 
-            {documentData.participants.map((p, index) => (
-              <div
-                key={index}
-                className="bg-slate-700 p-4 rounded-lg mb-3"
-              >
-                <p className="font-medium">{p.email}</p>
+            {documentData.participants.map((p, index) => {
 
-                <p className="text-sm text-slate-400">
-                  {p.role} {p.designation && `• ${p.designation}`}
-                </p>
+              const signingLink =
+                `${window.location.origin}/sign/${p.token}`;
 
-                {p.signingLink && (
-                  <div className="mt-2 text-sm text-blue-400 break-all">
-                    {p.signingLink}
+              return (
+                <div
+                  key={index}
+                  className="bg-slate-700 p-4 rounded-lg mb-3"
+                >
+                  <p className="font-medium">{p.email}</p>
 
-                    <button
-                      onClick={() =>
-                        navigator.clipboard.writeText(p.signingLink)
-                      }
-                      className="ml-3 text-xs bg-slate-600 px-2 py-1 rounded"
-                    >
-                      Copy
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
+                  <p className="text-sm text-slate-400">
+                    {p.role} {p.designation && `• ${p.designation}`}
+                  </p>
+
+                  {/* SIGNING LINK */}
+                  {documentData.signatureFields?.length > 0 && (
+                    <div className="mt-2 text-blue-400 break-all text-sm">
+
+                      {signingLink}
+
+                      <button
+                        onClick={() =>
+                          navigator.clipboard.writeText(signingLink)
+                        }
+                        className="ml-3 text-xs bg-slate-600 px-2 py-1 rounded"
+                      >
+                        Copy
+                      </button>
+
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* PDF PREVIEW */}
