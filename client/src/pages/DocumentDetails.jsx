@@ -222,7 +222,7 @@ function DocumentDetail() {
 
               {documentData.status === "Completed" && (
                 <a
-                  href={`${import.meta.env.VITE_API_URL}/api/documents/${id}/download`}
+                  href={documentData.filePath}
                   className="px-4 py-2 bg-emerald-600 rounded-lg hover:bg-emerald-700"
                 >
                   Download Signed PDF
@@ -294,7 +294,7 @@ function DocumentDetail() {
               className="w-full h-[700px] overflow-y-auto flex justify-center items-start bg-slate-900 rounded-lg"
             >
               <Document
-                file={`${import.meta.env.VITE_API_URL}/${documentData.filePath.replace(/\\/g, "/")}`}
+                file={documentData.filePath}
                 onLoadSuccess={({ numPages }) => setNumPages(numPages)}
               >
                 {numPages &&
