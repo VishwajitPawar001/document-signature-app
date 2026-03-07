@@ -262,7 +262,7 @@ exports.signDocument = async (req, res) => {
     const document = await Document.findById(decoded.documentId);
 
     if (!document)
-      return res.status(404).json({ message: "Not found" });
+      return res.status(404).json({ message: "Document not found" });
 
     const participant = document.participants.find(
       p => p.email.trim().toLowerCase() === decoded.email.trim().toLowerCase()
@@ -276,7 +276,7 @@ exports.signDocument = async (req, res) => {
         message: "Action already completed"
       });
 
-    /* ===== Sequential Enforcement ===== */
+    /* ===== Sequential Workflow Check ===== */
     if (document.workflowMode === "Sequential") {
       const nextPending = document.participants
         .filter(p => p.status === "Pending")
@@ -312,7 +312,7 @@ exports.signDocument = async (req, res) => {
 
     }
 
-    // ===== SIGNER / WITNESS =====
+    /* ===== SIGNER / WITNESS ===== */
     else {
 
       if (!signatureImage)
@@ -320,21 +320,32 @@ exports.signDocument = async (req, res) => {
           message: "Signature required"
         });
 
-      // Find existing layout field
-      const existingField = document.signatureFields.find(
+      // Find existing signature field
+      let existingField = document.signatureFields.find(
         f => f.participantEmail === participant.email
       );
 
-      if (!existingField)
-        return res.status(400).json({
-          message: "Signature field not found"
-        });
+      // 🔥 If field doesn't exist create one automatically
+      if (!existingField) {
+        existingField = {
+          page: 1,
+          xPercent: 0.7,
+          yPercent: 0.8,
+          widthPercent: 0.2,
+          heightPercent: 0.06,
+          participantEmail: participant.email,
+          role: participant.role,
+          designation: participant.designation || "",
+          status: "Pending"
+        };
 
-      //  Update existing field instead of pushing new one
+        document.signatureFields.push(existingField);
+      }
+
+      // Update field with signature
       existingField.image = signatureImage;
       existingField.status = "Signed";
       existingField.signedAt = new Date();
-      existingField.designation = participant.designation || "";
 
       participant.status = "Signed";
     }
@@ -366,8 +377,8 @@ exports.signDocument = async (req, res) => {
     res.json({ document });
 
   } catch (error) {
-    console.log(error);
-    res.status(401).json({ message: "Invalid link" });
+    console.log("SIGN ERROR:", error);
+    res.status(500).json({ message: "Signing failed" });
   }
 };
 
