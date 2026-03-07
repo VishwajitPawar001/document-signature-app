@@ -99,7 +99,7 @@ function SignDocument() {
         : { action: "approve" };
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/api/documents/sign/${token}`,
+      documentData.filePath,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
