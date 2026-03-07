@@ -66,7 +66,7 @@ function SignDocument() {
   const handleParticipantSign = async (imageData) => {
     try {
       const response = await fetch(
-        documentData.filePath,
+        `${import.meta.env.VITE_API_URL}/api/documents/sign/${token}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
