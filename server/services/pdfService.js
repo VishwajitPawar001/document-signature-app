@@ -1,5 +1,4 @@
 const axios = require("axios");
-const fs = require("fs");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
 exports.generateSignedPDF = async (document) => {
@@ -19,23 +18,22 @@ exports.generateSignedPDF = async (document) => {
 
       existingPdfBytes = response.data;
 
-    }
+    } 
     else if (document.filePath.startsWith("data:")) {
 
       const base64Data = document.filePath.split(",")[1];
       existingPdfBytes = Buffer.from(base64Data, "base64");
 
-    }
+    } 
     else {
 
-      existingPdfBytes = fs.readFileSync(document.filePath);
+      throw new Error("Invalid PDF source");
 
     }
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
-
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const pages = pdfDoc.getPages();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
     /* ==============================
        APPLY SIGNATURES
@@ -50,92 +48,44 @@ exports.generateSignedPDF = async (document) => {
 
       if (!pdfPage) continue;
 
-      const { width: pdfWidth, height: pdfHeight } = pdfPage.getSize();
+      const { width, height } = pdfPage.getSize();
 
-      const x = signature.xPercent * pdfWidth;
-      const width = signature.widthPercent * pdfWidth;
-      const height = signature.heightPercent * pdfHeight;
+      const x = signature.xPercent * width;
+      const y = height - (signature.yPercent * height);
 
-      const y =
-        pdfHeight -
-        (signature.yPercent * pdfHeight) -
-        height;
+      const sigWidth = signature.widthPercent * width;
+      const sigHeight = signature.heightPercent * height;
 
       const base64Data = signature.image.split(",")[1];
       const imageBytes = Buffer.from(base64Data, "base64");
 
-      let embeddedImage;
+      let image;
 
       if (signature.image.includes("png")) {
-        embeddedImage = await pdfDoc.embedPng(imageBytes);
+        image = await pdfDoc.embedPng(imageBytes);
       } else {
-        embeddedImage = await pdfDoc.embedJpg(imageBytes);
+        image = await pdfDoc.embedJpg(imageBytes);
       }
 
-      pdfPage.drawImage(embeddedImage, {
+      pdfPage.drawImage(image, {
         x,
-        y,
-        width,
-        height
+        y: y - sigHeight,
+        width: sigWidth,
+        height: sigHeight
       });
 
-      /* ==============================
-         TEXT BELOW SIGNATURE
-      ============================== */
+      /* SIGNER TEXT */
 
-      const baseTextY = y - 14;
-      let lineOffset = 0;
+      const textY = y - sigHeight - 14;
 
-      const name =
-        signature.participantName ||
-        signature.participantEmail;
-
-      pdfPage.drawText(name, {
+      pdfPage.drawText(signature.participantEmail, {
         x,
-        y: baseTextY - lineOffset,
+        y: textY,
         size: 10,
         font,
-        color: rgb(0, 0, 0)
+        color: rgb(0,0,0)
       });
 
-      lineOffset += 12;
-
-      if (signature.role) {
-        pdfPage.drawText(signature.role, {
-          x,
-          y: baseTextY - lineOffset,
-          size: 9,
-          font,
-          color: rgb(0.2, 0.2, 0.2)
-        });
-
-        lineOffset += 12;
-      }
-
-      if (signature.designation) {
-        pdfPage.drawText(signature.designation, {
-          x,
-          y: baseTextY - lineOffset,
-          size: 9,
-          font,
-          color: rgb(0.3, 0.3, 0.3)
-        });
-
-        lineOffset += 12;
-      }
-
-      if (signature.signedAt) {
-        pdfPage.drawText(
-          new Date(signature.signedAt).toLocaleString(),
-          {
-            x,
-            y: baseTextY - lineOffset,
-            size: 8,
-            font,
-            color: rgb(0.5, 0.5, 0.5)
-          }
-        );
-      }
     }
 
     const pdfBytes = await pdfDoc.save();
