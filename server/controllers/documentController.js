@@ -1,7 +1,7 @@
 const Document = require("../models/Document");
 const { generateSignedPDF } = require("../services/pdfService");
 const { sendSigningEmail } = require("../services/emailService");
-const { cloudinary } = require("../config/cloudinary");
+const cloudinary = require("../config/cloudinary");
 const jwt = require("jsonwebtoken");
 
 /* =====================================
