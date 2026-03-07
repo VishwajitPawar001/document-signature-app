@@ -20,7 +20,7 @@ exports.generateSignedPDF = async (document) => {
       existingPdfBytes = response.data;
 
     }
-    else if (document.filePath.startsWith("data:application/pdf")) {
+    else if (document.filePath.startsWith("data:")) {
 
       const base64Data = document.filePath.split(",")[1];
       existingPdfBytes = Buffer.from(base64Data, "base64");
