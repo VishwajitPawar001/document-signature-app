@@ -9,7 +9,7 @@ const Document = require("../models/Document");
 exports.signDocument = async (req, res) => {
     try {
         const { token } = req.params;
-        const { type, value, image, x, y, page } = req.body;
+        const { type, value, image, x, y, width, height, page } = req.body;
 
         const participant = await DocumentParticipant.findOne({ token });
 
@@ -28,7 +28,7 @@ exports.signDocument = async (req, res) => {
         }
 
         // Sequential check
-        if (document.workflowType === "Sequential") {
+        if ((document.workflowMode || document.workflowType) === "Sequential") {
             const previousParticipants = await DocumentParticipant.find({
                 document: document._id,
                 order: { $lt: participant.order },
@@ -78,25 +78,13 @@ exports.signDocument = async (req, res) => {
                 : image;
 
             const imageBuffer = Buffer.from(base64Data, "base64");
-
             const pngImage = await pdfDoc.embedPng(imageBuffer);
-
-            // IMAGE SIGNATURE
-            if (type === "image") {
-                const base64Data = image.includes("base64,")
-                    ? image.split("base64,")[1]
-                    : image;
-
-                const imageBuffer = Buffer.from(base64Data, "base64");
-                const pngImage = await pdfDoc.embedPng(imageBuffer);
-
-                selectedPage.drawImage(pngImage, {
-                    x,
-                    y,
-                    width,
-                    height,
-                });
-            }
+            selectedPage.drawImage(pngImage, {
+                x,
+                y,
+                width: width || 120,
+                height: height || 50,
+            });
         }
 
         // Save updated PDF

@@ -29,7 +29,7 @@ exports.addParticipants = async (req, res) => {
             createdParticipants.push(participant);
         }
 
-        document.status = "In Progress";
+        document.status = "InProgress";
         await document.save();
 
         res.status(201).json({message: "Participants added successfully", participants: createdParticipants});
