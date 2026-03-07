@@ -1,7 +1,7 @@
 const Document = require("../models/Document");
 const { generateSignedPDF } = require("../services/pdfService");
 const { sendSigningEmail } = require("../services/emailService");
-const { cloudinary } = require("../config/cloudinary");
+const cloudinary = require("../config/cloudinary").cloudinary;
 const jwt = require("jsonwebtoken");
 
 /* =====================================
@@ -365,8 +365,7 @@ exports.signDocument = async (req, res) => {
         `data:application/pdf;base64,${pdfBuffer.toString("base64")}`,
         {
           resource_type: "raw",
-          folder: "signed_documents",
-          public_id: `signed_${document._id}_${Date.now()}`
+          folder: "signed_documents"
         }
       );
 
