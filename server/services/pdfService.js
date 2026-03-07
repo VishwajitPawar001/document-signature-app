@@ -1,17 +1,17 @@
-const fs = require("fs");
-const path = require("path");
+const axios = require("axios");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
 exports.generateSignedPDF = async (document) => {
   try {
 
-    const originalPath = path.join(
-      __dirname,
-      "..",
-      document.filePath
-    );
+    /* ===== DOWNLOAD PDF FROM CLOUDINARY ===== */
 
-    const existingPdfBytes = fs.readFileSync(originalPath);
+    const response = await axios.get(document.filePath, {
+      responseType: "arraybuffer"
+    });
+
+    const existingPdfBytes = response.data;
+
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -112,7 +112,7 @@ exports.generateSignedPDF = async (document) => {
       }
     }
 
-    /* 🔥 IMPORTANT: RETURN PDF BUFFER INSTEAD OF SAVING */
+    /* ===== RETURN FINAL PDF BUFFER ===== */
 
     const pdfBytes = await pdfDoc.save();
 

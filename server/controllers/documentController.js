@@ -1,6 +1,7 @@
 const Document = require("../models/Document");
 const { generateSignedPDF } = require("../services/pdfService");
 const { sendSigningEmail } = require("../services/emailService");
+const { cloudinary } = require("../config/cloudinary");
 const jwt = require("jsonwebtoken");
 
 /* =====================================
@@ -358,8 +359,18 @@ exports.signDocument = async (req, res) => {
     if (allComplete && document.status !== "Rejected") {
       document.status = "Completed";
 
-      const signedPath = await generateSignedPDF(document);
-      document.filePath = signedPath;
+      const pdfBuffer = await generateSignedPDF(document);
+
+      const uploadResult = await cloudinary.uploader.upload(
+        `data:application/pdf;base64,${pdfBuffer.toString("base64")}`,
+        {
+          resource_type: "raw",
+          folder: "signed_documents",
+          public_id: `signed_${document._id}_${Date.now()}`
+        }
+      );
+
+      document.filePath = uploadResult.secure_url;
     }
 
     /* ===== Audit Trail ===== */
