@@ -229,7 +229,7 @@ exports.getDocumentForSigning = async (req, res) => {
       return res.status(404).json({ message: "Not found" });
 
     const participant = document.participants.find(
-      p => p.email === decoded.email
+      p => p.email.trim().toLowerCase() === decoded.email.trim().toLowerCase()
     );
 
     if (!participant)
@@ -265,7 +265,7 @@ exports.signDocument = async (req, res) => {
       return res.status(404).json({ message: "Not found" });
 
     const participant = document.participants.find(
-      p => p.email === decoded.email
+      p => p.email.trim().toLowerCase() === decoded.email.trim().toLowerCase()
     );
 
     if (!participant)
