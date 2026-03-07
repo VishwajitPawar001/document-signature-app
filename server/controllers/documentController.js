@@ -361,13 +361,24 @@ exports.signDocument = async (req, res) => {
 
       const pdfBuffer = await generateSignedPDF(document);
 
-      const uploadResult = await cloudinary.uploader.upload(
-        `data:application/pdf;base64,${pdfBuffer.toString("base64")}`,
-        {
-          resource_type: "raw",
-          folder: "signed_documents"
-        }
-      );
+      const streamifier = require("streamifier");
+
+      const uploadResult = await new Promise((resolve, reject) => {
+
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            resource_type: "raw",
+            folder: "signed_documents"
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+
+        streamifier.createReadStream(pdfBuffer).pipe(stream);
+
+      });
 
       document.filePath = uploadResult.secure_url;
     }
