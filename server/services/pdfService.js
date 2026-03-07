@@ -1,21 +1,45 @@
 const axios = require("axios");
+const fs = require("fs");
 const { PDFDocument, StandardFonts, rgb } = require("pdf-lib");
 
 exports.generateSignedPDF = async (document) => {
   try {
 
-    /* ===== DOWNLOAD PDF FROM CLOUDINARY ===== */
+    let existingPdfBytes;
 
-    const response = await axios.get(document.filePath, {
-      responseType: "arraybuffer"
-    });
+    /* ==============================
+       LOAD ORIGINAL PDF
+    ============================== */
 
-    const existingPdfBytes = response.data;
+    if (document.filePath.startsWith("http")) {
+
+      const response = await axios.get(document.filePath, {
+        responseType: "arraybuffer"
+      });
+
+      existingPdfBytes = response.data;
+
+    } 
+    else if (document.filePath.startsWith("data:application/pdf")) {
+
+      const base64Data = document.filePath.split(",")[1];
+      existingPdfBytes = Buffer.from(base64Data, "base64");
+
+    } 
+    else {
+
+      existingPdfBytes = fs.readFileSync(document.filePath);
+
+    }
 
     const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const pages = pdfDoc.getPages();
+
+    /* ==============================
+       APPLY SIGNATURES
+    ============================== */
 
     for (const signature of document.signatureFields) {
 
@@ -55,7 +79,9 @@ exports.generateSignedPDF = async (document) => {
         height
       });
 
-      /* ===== TEXT BELOW SIGNATURE ===== */
+      /* ==============================
+         TEXT BELOW SIGNATURE
+      ============================== */
 
       const baseTextY = y - 14;
       let lineOffset = 0;
@@ -112,7 +138,9 @@ exports.generateSignedPDF = async (document) => {
       }
     }
 
-    /* ===== RETURN FINAL PDF BUFFER ===== */
+    /* ==============================
+       SAVE PDF
+    ============================== */
 
     const pdfBytes = await pdfDoc.save();
 
