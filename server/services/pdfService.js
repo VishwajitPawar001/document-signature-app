@@ -19,13 +19,13 @@ exports.generateSignedPDF = async (document) => {
 
       existingPdfBytes = response.data;
 
-    } 
+    }
     else if (document.filePath.startsWith("data:application/pdf")) {
 
       const base64Data = document.filePath.split(",")[1];
       existingPdfBytes = Buffer.from(base64Data, "base64");
 
-    } 
+    }
     else {
 
       existingPdfBytes = fs.readFileSync(document.filePath);
@@ -54,11 +54,11 @@ exports.generateSignedPDF = async (document) => {
 
       const x = signature.xPercent * pdfWidth;
       const width = signature.widthPercent * pdfWidth;
-      const height = signature.heightPercent * pdfWidth;
+      const height = signature.heightPercent * pdfHeight;
 
       const y =
         pdfHeight -
-        (signature.yPercent * pdfWidth) -
+        (signature.yPercent * pdfHeight) -
         height;
 
       const base64Data = signature.image.split(",")[1];
@@ -137,10 +137,6 @@ exports.generateSignedPDF = async (document) => {
         );
       }
     }
-
-    /* ==============================
-       SAVE PDF
-    ============================== */
 
     const pdfBytes = await pdfDoc.save();
 
